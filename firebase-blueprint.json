@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "Vendor": {
+      "title": "Vendor",
+      "description": "Vendor profile record containing onboarding progress, brand assets, and session information.",
+      "type": "object",
+      "properties": {
+        "serialCode": { "type": "string", "description": "System-generated unique serial code to resume session" },
+        "authUid": { "type": "string", "description": "Firebase Auth UID if aligned with a Google account" },
+        "firstName": { "type": "string", "description": "Vendor first name" },
+        "lastName": { "type": "string", "description": "Vendor last name" },
+        "businessName": { "type": "string", "description": "Business or store name" },
+        "email": { "type": "string", "description": "Contact email address" },
+        "phone": { "type": "string", "description": "Contact phone number" },
+        "preferredDomain": { "type": "string", "description": "Proposed domain name" },
+        "logoUrl": { "type": "string", "description": "Logo asset URL or raw data" },
+        "bannerUrl": { "type": "string", "description": "Banner asset URL or generated representation" },
+        "progress": { "type": "integer", "description": "onboarding percentage completion from 0 to 100" },
+        "completed": { "type": "boolean", "description": "Whether onboarding has been completed" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Session creation time" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update time" },
+        "lastActive": { "type": "string", "format": "date-time", "description": "Last active timestamp for dormancy checks" }
+      },
+      "required": ["serialCode"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Products registered within the vendor's catalog.",
+      "type": "object",
+      "properties": {
+        "imageUrl": { "type": "string", "description": "Product image source or base64 data" },
+        "name": { "type": "string", "description": "Optimized product headline" },
+        "price": { "type": "number", "description": "Retail price of the product" },
+        "weight": { "type": "number", "description": "Weight in kg" },
+        "description": { "type": "string", "description": "Product description copy" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Product catalog registration timestamp" }
+      },
+      "required": ["name", "price"]
+    }
+  },
+  "firestore": {
+    "/vendors/{vendorId}": {
+      "schema": "Vendor",
+      "description": "Primary vendor profile session mapping."
+    },
+    "/vendors/{vendorId}/products/{productId}": {
+      "schema": "Product",
+      "description": "Cataloged products under each individual vendor."
+    }
+  }
+}

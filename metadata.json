@@ -1,0 +1,6 @@
+{
+  "name": "Makolastores Vendor Gateway",
+  "description": "An interactive, beautiful single-screen vendor onboarding wizard optimized with AI domain recommendations, SKU cataloging loops, shipping logistics weight charts, and an administrator TTL monitor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

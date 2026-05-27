@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-macular-charcoal: #1d1d1f;
+  --color-macular-gray: #86868b;
+  --color-macular-gold: #D4AF37;
+  --color-macular-gold-light: #E6C655;
+  --color-macular-ivory: #f5f5f7;
+}
+
+@layer utilities {
+  /* Ultra-sleek custom glass overlays */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  
+  .dark-glass-card {
+    background: rgba(29, 29, 31, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .premium-glow-amber {
+    box-shadow: 0 0 50px -10px rgba(212, 175, 55, 0.1);
+  }
+
+  .premium-glow-indigo {
+    box-shadow: 0 0 50px -15px rgba(0, 102, 204, 0.15);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f5f5f7; /* Apple premium off-white context grid */
+  color: #1d1d1f; /* Apple carbon jet-black typography */
+  letter-spacing: -0.015em; /* Apple body tracking optimization */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Base animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 8s infinite ease-in-out;
+}

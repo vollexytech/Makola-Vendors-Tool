@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Dynamic Helper to evaluate administrator authorization parameters
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.email == 'kingjudecole@gmail.com' && 
+             request.auth.token.email_verified == true;
+    }
+
+    // Hardened ID checker protecting against poisoning
+    function isValidId(id) {
+      return id is string && id.size() <= 64 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Extract incoming payload details
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Retrieve database profile parameters
+    function existing() {
+      return resource.data;
+    }
+
+    // Validate Vendor object fields
+    function isValidVendor(vendor) {
+      return vendor.keys().hasAll(['serialCode']) &&
+             vendor.serialCode is string &&
+             vendor.serialCode.size() >= 4 &&
+             vendor.serialCode.size() <= 32 &&
+             (!('id' in vendor) || (vendor.id is string && vendor.id.size() <= 64)) &&
+             (!('firstName' in vendor) || (vendor.firstName is string && vendor.firstName.size() <= 128)) &&
+             (!('lastName' in vendor) || (vendor.lastName is string && vendor.lastName.size() <= 128)) &&
+             (!('businessName' in vendor) || (vendor.businessName is string && vendor.businessName.size() <= 256)) &&
+             (!('email' in vendor) || (vendor.email is string && vendor.email.size() <= 256)) &&
+             (!('phone' in vendor) || (vendor.phone is string && vendor.phone.size() <= 128)) &&
+             (!('preferredDomain' in vendor) || (vendor.preferredDomain is string && vendor.preferredDomain.size() <= 256)) &&
+             (!('logoUrl' in vendor) || (vendor.logoUrl is string && vendor.logoUrl.size() <= 1048576)) &&
+             (!('bannerUrl' in vendor) || (vendor.bannerUrl is string && vendor.bannerUrl.size() <= 1048576)) &&
+             (!('progress' in vendor) || (vendor.progress is int && vendor.progress >= 0 && vendor.progress <= 100)) &&
+             (!('completed' in vendor) || (vendor.completed is bool)) &&
+             (!('createdAt' in vendor) || (vendor.createdAt is string && vendor.createdAt.size() <= 64)) &&
+             (!('updatedAt' in vendor) || (vendor.updatedAt is string && vendor.updatedAt.size() <= 64)) &&
+             (!('lastActive' in vendor) || (vendor.lastActive is string && vendor.lastActive.size() <= 64)) &&
+             (!('authUid' in vendor) || (vendor.authUid is string && vendor.authUid.size() <= 64));
+    }
+
+    // Validate Product catalog fields
+    function isValidProduct(product) {
+      return product.keys().hasAll(['name', 'price']) &&
+             product.name is string && product.name.size() > 0 && product.name.size() <= 256 &&
+             (product.price is int || product.price is float) && product.price >= 0.0 && product.price <= 1000000.0 &&
+             (!('id' in product) || (product.id is string && product.id.size() <= 64)) &&
+             (!('imageUrl' in product) || (product.imageUrl is string && product.imageUrl.size() <= 1048576)) &&
+             (!('weight' in product) || ((product.weight is int || product.weight is float) && product.weight >= 0.0 && product.weight <= 10000.0)) &&
+             (!('description' in product) || (product.description is string && product.description.size() <= 65536)) &&
+             (!('createdAt' in product) || (product.createdAt is string && product.createdAt.size() <= 64));
+    }
+
+    match /vendors/{vendorId} {
+      allow get: if isAdmin() || isValidId(vendorId);
+
+      allow list: if isAdmin() || (
+        request.query.limit <= 5 && 
+        resource.data.serialCode == request.query.filters.serialCode[0]
+      );
+
+      allow create: if isValidId(vendorId) && isValidVendor(incoming()) && (
+        !('authUid' in incoming()) || (request.auth != null && incoming().authUid == request.auth.uid)
+      );
+
+      allow update: if isValidId(vendorId) && (
+        isAdmin() || (
+          isValidVendor(incoming()) && 
+          incoming().serialCode == existing().serialCode &&
+          (!('authUid' in existing()) || incoming().authUid == existing().authUid) &&
+          incoming().createdAt == existing().createdAt
+        )
+      );
+
+      allow delete: if isAdmin();
+
+      match /products/{productId} {
+        allow read, list: if isAdmin() || isValidId(vendorId);
+
+        allow create, update: if isValidId(vendorId) && isValidId(productId) && (
+          isAdmin() || (
+            isValidProduct(incoming()) &&
+            exists(/databases/$(database)/documents/vendors/$(vendorId))
+          )
+        );
+
+        allow delete: if isAdmin();
+      }
+    }
+  }
+}
